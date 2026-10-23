@@ -53,8 +53,11 @@ public:
 	
 	FOnAttributeChanged& GetAttributeChangedDelegate(FGameplayTag InAttributeTag) { return AttributeChangedDelegates.FindOrAdd(InAttributeTag); }
 	
-	UFUNCTION(BlueprintCallable, Category = "Action System")
+	UFUNCTION(BlueprintCallable,DisplayName="Add Dynamic Attribute Changed Delegate", Category = "Action System", meta=(Keywords="events,delegate"))
 	void AddDynamicAttributeChangedDelegate(const FGameplayTag InAttributeTag, const FOnAttributeDynamicChanged& InDelegate);
+	
+	UFUNCTION(BlueprintCallable,DisplayName="Remove Dynamic Attribute Changed Delegate", Category = "Action System", meta=(Keywords="events,delegate"))
+	void RemoveDynamicAttributeChangedDelegate(const FOnAttributeDynamicChanged& InDelegate);
 	
 protected:
 	

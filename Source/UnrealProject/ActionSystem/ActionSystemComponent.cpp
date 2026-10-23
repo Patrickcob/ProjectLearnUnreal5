@@ -45,6 +45,17 @@ void UActionSystemComponent::AddDynamicAttributeChangedDelegate(const FGameplayT
 	Delegates.Add(InDelegate);
 }
 
+void UActionSystemComponent::RemoveDynamicAttributeChangedDelegate(const FOnAttributeDynamicChanged& InDelegate)
+{
+	for (TTuple<FGameplayTag, TArray<FOnAttributeDynamicChanged>>& Delegate : AttributeDynamicChangedDelegates)
+	{
+		if (Delegate.Value.RemoveSingle(InDelegate) > 0)
+		{
+			break;
+		}
+	}
+}
+
 void UActionSystemComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
@@ -111,11 +122,13 @@ void UActionSystemComponent::ApplyAttributeChange(FGameplayTag InAttributeTag, f
 		TArray<FOnAttributeDynamicChanged>* DynamicDelegates = AttributeDynamicChangedDelegates.Find(InAttributeTag);
 		if (DynamicDelegates)
 		{
-			for (const FOnAttributeDynamicChanged& Delegate : *DynamicDelegates)
+			for (int i = DynamicDelegates->Num() - 1; i >= 0; --i)
 			{
+				FOnAttributeDynamicChanged& Delegate = (*DynamicDelegates)[i];
 				if (!Delegate.ExecuteIfBound(InAttributeTag, Attribute->GetValue(), OldValue))
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Dynamic delegate for attribute %s failed to execute"), *InAttributeTag.ToString());
+					UE_LOG(LogTemp, Warning, TEXT("Dynamic delegate for attribute %s failed to execute, deleting delegate for %s"), *InAttributeTag.ToString(), *GetNameSafe(GetOwner()));
+					DynamicDelegates->RemoveAt(i);
 				}
 			}
 		}
