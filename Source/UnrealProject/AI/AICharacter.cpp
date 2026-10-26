@@ -12,6 +12,7 @@
 AAICharacter::AAICharacter()
 {
 	ActionSystemComponent = CreateDefaultSubobject<UActionSystemComponent>("ActionSystemComponent");
+	ActionSystemComponent->SetDefaultAttributes(UAIAttributeSet::StaticClass());
 }
 
 void AAICharacter::PostInitializeComponents()

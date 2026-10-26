@@ -24,6 +24,7 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	
 	ActionSystemComponent = CreateDefaultSubobject<UActionSystemComponent>("ActionSystemComponent");
+	ActionSystemComponent->SetDefaultAttributes(UPlayerAttributeSet::StaticClass());
 }
 
 
@@ -96,7 +97,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	if (EnhancedInputComponent == nullptr)
 	{
-		return;		
+		return;
 	}
 	
 	EnhancedInputComponent->BindAction(Input_Move, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);

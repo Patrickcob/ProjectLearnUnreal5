@@ -47,6 +47,13 @@ UPawnAttributeSet::UPawnAttributeSet()
 	MoveSpeed = FAttribute(600.0f);
 }
 
+void UPlayerAttributeSet::PostProcessAttributeChange()
+{
+	Super::PostProcessAttributeChange();
+	Rage.Base = FMath::Clamp(Rage.GetValue(), 0.0f, MaxRage.GetValue());
+
+}
+
 UPlayerAttributeSet::UPlayerAttributeSet()
 {
 	Rage = FAttribute(0.0f);

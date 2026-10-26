@@ -34,10 +34,11 @@ protected:
 	
 	UPROPERTY(Transient)
 	float CoolDownUntil = 0.0f;
-	
+
+public:	
 	UPROPERTY(Transient)
 	bool IsRunning = false;
-public:	
+	
 	FGameplayTag GetActionName() const { return ActionName; }
 	
 	float CoolDownTimeRemaining() const { return FMath::Max(0.0f, CoolDownUntil - GetWorld()->GetTimeSeconds()); }

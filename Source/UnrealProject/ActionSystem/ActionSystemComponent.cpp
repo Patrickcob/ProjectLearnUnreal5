@@ -12,8 +12,6 @@
 UActionSystemComponent::UActionSystemComponent()
 {
 	bWantsInitializeComponent = true;
-	
-	AttributeSetClass = UAttributeSet::StaticClass();
 }
 
 FAttribute* UActionSystemComponent::GetAttribute(FGameplayTag InAttributeTag) const
@@ -59,9 +57,13 @@ void UActionSystemComponent::RemoveDynamicAttributeChangedDelegate(const FOnAttr
 void UActionSystemComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
-	
-	Attributes = NewObject<UAttributeSet>(this, AttributeSetClass);
 
+	if (Attributes == nullptr)
+	{
+		Attributes = NewObject<UAttributeSet>(this, UAttributeSet::StaticClass());
+		UE_LOG(LogTemp, Warning, TEXT("No default AttributeSet defined for %s, creating default AttributeSet."), *GetNameSafe(GetOwner()));
+	}
+	
 	for (TFieldIterator<FStructProperty> It(Attributes->GetClass()); It; ++It)
 	{
 		FAttribute* FoundAttribute = It->ContainerPtrToValuePtr<FAttribute>(Attributes);
@@ -79,6 +81,14 @@ void UActionSystemComponent::InitializeComponent()
 			Actions.Add(NewAction->GetActionName(), NewAction);
 		}
 	}
+}
+
+void UActionSystemComponent::SetDefaultAttributes(TSubclassOf<UAttributeSet> InAttributeSetClass)
+{
+	check(!HasBeenInitialized());
+	
+	FObjectInitializer& ObjectInitializer = FObjectInitializer::Get();
+	Attributes = Cast<UAttributeSet>(ObjectInitializer.CreateDefaultSubobject(this, TEXT("Attributes"), InAttributeSetClass, InAttributeSetClass));
 }
 
 void UActionSystemComponent::BeginPlay()
@@ -165,7 +175,11 @@ void UActionSystemComponent::StopAction(FGameplayTag InActionName)
 	TObjectPtr<UAction>* Action = Actions.Find(InActionName);
 	if (Action)
 	{
-		(*Action)->StopAction();
+		if ((*Action)->IsRunning)
+		{
+			(*Action)->StopAction();
+		}
+		
 		return;
 	}
 	
@@ -185,7 +199,7 @@ bool UActionSystemComponent::HasEnoughAttributes(const TMap<FGameplayTag, float>
 	for (const TPair<FGameplayTag, float>& AttributeCost : GameplayTags)
 	{
 		FAttribute* Attribute = GetAttribute(AttributeCost.Key);
-		if (!Attribute || Attribute->GetValue() < AttributeCost.Value)
+		if (!Attribute)
 		{
 			continue;
 		}

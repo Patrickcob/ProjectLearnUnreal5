@@ -31,6 +31,8 @@ class UNREALPROJECT_API UActionSystemComponent : public UActorComponent
 public:
 	virtual void InitializeComponent() override;
 	
+	void SetDefaultAttributes(TSubclassOf<UAttributeSet> InAttributeSetClass);
+	
 	virtual void BeginPlay() override;
 	
 	UFUNCTION(BlueprintCallable, Category = "Action System")
@@ -63,13 +65,10 @@ public:
 	
 protected:
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Instanced, NoClear)
 	TObjectPtr<UAttributeSet> Attributes;
 	
 	TMap<FGameplayTag, FAttribute*> AttributesByTag;
-	
-	UPROPERTY(EditAnywhere, Category = "Attributes", NoClear)
-	TSubclassOf<UAttributeSet> AttributeSetClass;
 	
 	TMap<FGameplayTag, FOnAttributeChanged> AttributeChangedDelegates;
 	

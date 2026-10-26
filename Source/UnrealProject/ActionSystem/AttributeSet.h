@@ -33,7 +33,7 @@ struct FAttribute
 /**
  * 
  */
-UCLASS()
+UCLASS(EditInlineNew)
 class UNREALPROJECT_API UAttributeSet : public UObject
 {
 	GENERATED_BODY()
@@ -53,10 +53,10 @@ class UHealthAttributeSet : public UAttributeSet
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category="Attributes")
+	UPROPERTY(EditAnywhere, Category="Health")
 	FAttribute Health;
 	
-	UPROPERTY(EditAnywhere, Category="Attributes")
+	UPROPERTY(EditAnywhere, Category="Health")
 	FAttribute MaxHealth;
 	
 	virtual void PostProcessAttributeChange() override;
@@ -72,7 +72,7 @@ class UPawnAttributeSet : public UHealthAttributeSet
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category="Attributes")
+	UPROPERTY(EditAnywhere, Category="MoveSpeed")
 	FAttribute MoveSpeed;
 
 	void ApplyMoveSpeed();
@@ -91,11 +91,13 @@ class UPlayerAttributeSet : public UPawnAttributeSet
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, Category="Attributes")
+	UPROPERTY(EditAnywhere, Category="Resources")
 	FAttribute Rage;
 	
-	UPROPERTY(EditAnywhere, Category="Attributes")
+	UPROPERTY(EditAnywhere, Category="Resources")
 	FAttribute MaxRage;
+	
+	virtual void PostProcessAttributeChange() override;
 	
 	UPlayerAttributeSet();
 };
