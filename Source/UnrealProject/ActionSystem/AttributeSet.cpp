@@ -47,6 +47,12 @@ UPawnAttributeSet::UPawnAttributeSet()
 	MoveSpeed = FAttribute(600.0f);
 }
 
+UPlayerAttributeSet::UPlayerAttributeSet()
+{
+	Rage = FAttribute(0.0f);
+	MaxRage = FAttribute(100.0f);
+}
+
 UAIAttributeSet::UAIAttributeSet()
 {
 	MoveSpeed = FAttribute(450.0f);

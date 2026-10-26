@@ -90,6 +90,14 @@ UCLASS()
 class UPlayerAttributeSet : public UPawnAttributeSet
 {
 	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, Category="Attributes")
+	FAttribute Rage;
+	
+	UPROPERTY(EditAnywhere, Category="Attributes")
+	FAttribute MaxRage;
+	
+	UPlayerAttributeSet();
 };
 
 #pragma endregion 

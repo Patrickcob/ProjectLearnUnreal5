@@ -26,6 +26,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	FGameplayTagContainer BlockedTags;
 	
+	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
+	TMap<FGameplayTag, float> AttributesConsumedOnStart;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	float CoolDownTime = 0.0f;
 	
@@ -34,7 +37,6 @@ protected:
 	
 	UPROPERTY(Transient)
 	bool IsRunning = false;
-	
 public:	
 	FGameplayTag GetActionName() const { return ActionName; }
 	

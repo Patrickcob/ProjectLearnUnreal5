@@ -40,6 +40,8 @@ public:
 	
 	void StopAction(FGameplayTag InActionName);
 	
+	bool HasEnoughAttributes(const TMap<FGameplayTag, float>& GameplayTags);
+
 	// Sets default values for this component's properties
 	UActionSystemComponent();
 	

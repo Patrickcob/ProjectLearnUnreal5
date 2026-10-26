@@ -171,3 +171,28 @@ void UActionSystemComponent::StopAction(FGameplayTag InActionName)
 	
 	UE_LOG(LogTemp, Warning, TEXT("Action %s not found"), *InActionName.ToString());
 }
+
+bool UActionSystemComponent::HasEnoughAttributes(const TMap<FGameplayTag, float>& GameplayTags)
+{
+	float TotalToSpend = 0.0f;
+	float TotalCost = 0.0f;
+
+	if (GameplayTags.IsEmpty())
+	{
+		return true;
+	}
+	
+	for (const TPair<FGameplayTag, float>& AttributeCost : GameplayTags)
+	{
+		FAttribute* Attribute = GetAttribute(AttributeCost.Key);
+		if (!Attribute || Attribute->GetValue() < AttributeCost.Value)
+		{
+			continue;
+		}
+		
+		TotalToSpend += Attribute->GetValue();
+		TotalCost += AttributeCost.Value;
+	}
+	
+	return TotalToSpend >= TotalCost;
+}

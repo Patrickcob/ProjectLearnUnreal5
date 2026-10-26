@@ -4,7 +4,6 @@
 #include "PlayerCharacter.h"
 
 #include "EnhancedInputComponent.h"
-#include "NiagaraFunctionLibrary.h"
 #include "SharedGameplayTags.h"
 #include "ActionSystem/ActionSystemComponent.h"
 #include "Camera/CameraComponent.h"
@@ -82,7 +81,10 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 	class AController* EventInstigator, AActor* DamageCauser)
 {
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	ActionSystemComponent->ApplyAttributeChange(SharedGameplayTags::Attribute_Rage, ActualDamage, Base);
 	ActionSystemComponent->ApplyAttributeChange(SharedGameplayTags::Attribute_Health, -ActualDamage, Base);
+	
 	return ActualDamage;
 }
 

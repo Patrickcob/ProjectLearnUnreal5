@@ -9,4 +9,6 @@ namespace SharedGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Action_TeleporterAttack);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attribute_Health);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attribute_MaxHealth);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attribute_Rage);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attribute_MaxRage);
 }
