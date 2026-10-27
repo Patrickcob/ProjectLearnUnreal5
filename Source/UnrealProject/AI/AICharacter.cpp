@@ -18,6 +18,9 @@ AAICharacter::AAICharacter()
 void AAICharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	
+	GetMesh()->SetOverlayMaterialMaxDrawDistance(1);
+
 	ActionSystemComponent->GetAttributeChangedDelegate(SharedGameplayTags::Attribute_Health).AddUObject(this, &ThisClass::OnHealthChanged);
 }
 
@@ -38,5 +41,17 @@ float AAICharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 	
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	ActionSystemComponent->ApplyAttributeChange(SharedGameplayTags::Attribute_Health, -ActualDamage, Base);
+	
+	GetMesh()->SetOverlayMaterialMaxDrawDistance(0);
+	GetMesh()->SetCustomPrimitiveDataFloat(0, GetWorld()->TimeSeconds);
+	
+	GetWorldTimerManager().SetTimer(OverlayTimerHandle, [this]()
+	{
+		if (GetMesh())
+		{
+			GetMesh()->SetOverlayMaterialMaxDrawDistance(1);
+		}
+	}, 1.0f, false);
+	
 	return ActualDamage;
 }

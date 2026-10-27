@@ -25,8 +25,11 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UActionSystemComponent> ActionSystemComponent;
-	
+
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Death")
 	TObjectPtr<UAnimMontage> DeathMontage;
+	
+	FTimerHandle OverlayTimerHandle;
 };

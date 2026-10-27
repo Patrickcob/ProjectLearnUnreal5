@@ -60,7 +60,7 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UActionSystemComponent> ActionSystemComponent;
-	
+
 	void StartAction(FGameplayTag InActionName);
 	void StopAction(FGameplayTag InActionName);
 
@@ -69,6 +69,8 @@ protected:
 	void Look(const FInputActionValue& Value);
 	
 	void OnHealthChanged(FGameplayTag InAttributeTag, float NewHealth, float OldHealth);
+	
+	FTimerHandle OverlayTimerHandle;
 public:
 	virtual void PostInitializeComponents() override;
 	

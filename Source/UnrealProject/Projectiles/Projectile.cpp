@@ -26,6 +26,8 @@ AProjectile::AProjectile()
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
 	ProjectileMovementComponent->InitialSpeed = 2000.0f;
 	ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
+	
+	InitialLifeSpan = 10.0f;
 }
 
 void AProjectile::PostInitializeComponents()

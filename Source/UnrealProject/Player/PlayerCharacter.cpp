@@ -30,7 +30,7 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::OnHealthChanged(FGameplayTag InAttributeTag, float NewHealth, float OldHealth)
 {
-	if (FMath::IsNearlyZero(NewHealth))
+	if (FMath::IsNearlyZero(NewHealth) && OldHealth > 0.0f)
 	{
 		DisableInput(nullptr);
 		
@@ -42,6 +42,9 @@ void APlayerCharacter::OnHealthChanged(FGameplayTag InAttributeTag, float NewHea
 void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	
+	GetMesh()->SetOverlayMaterialMaxDrawDistance(1);
+	
 	ActionSystemComponent->GetAttributeChangedDelegate(SharedGameplayTags::Attribute_Health).AddUObject(this, &ThisClass::OnHealthChanged);
 }
 
@@ -86,6 +89,17 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 	ActionSystemComponent->ApplyAttributeChange(SharedGameplayTags::Attribute_Rage, ActualDamage, Base);
 	ActionSystemComponent->ApplyAttributeChange(SharedGameplayTags::Attribute_Health, -ActualDamage, Base);
 	
+	GetMesh()->SetOverlayMaterialMaxDrawDistance(0);
+	GetMesh()->SetCustomPrimitiveDataFloat(0, GetWorld()->TimeSeconds);
+	
+	GetWorldTimerManager().SetTimer(OverlayTimerHandle, [this]()
+	{
+		if (GetMesh())
+		{
+			GetMesh()->SetOverlayMaterialMaxDrawDistance(1);
+		}
+	}, 1.0f, false);
+		
 	return ActualDamage;
 }
 
