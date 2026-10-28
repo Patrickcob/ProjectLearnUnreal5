@@ -18,7 +18,8 @@ public:
 	void AddCoinBuffers(TArray<FVector> NewLocations, TArray<int32> NewAmounts);
 
 	void RemoveCoinBuffer(int Element);
-	 virtual void Tick(float DeltaTime) override;
+	void PlayPickupSound();
+	virtual void Tick(float DeltaTime) override;
 	
 	virtual TStatId GetStatId() const override
 	{
@@ -28,8 +29,16 @@ public:
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
 protected:
+	void OnCoinBufferMeshLoaded(const FSoftObjectPath& SoftObjectPath, UObject* LoadedObject);
+	void OnPickupSoundLoaded(const FSoftObjectPath& SoftObjectPath, UObject* LoadedObject);
+	
 	UPROPERTY()
 	TObjectPtr<UInstancedStaticMeshComponent> WorldISMComponent;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	TObjectPtr<UAudioComponent> PickupAudioComponent;
+	
+	FName PickupSoundParameter;
 	
 	TArray<FVector> Locations;
 	TArray<int32> Amounts;

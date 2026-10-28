@@ -4,7 +4,9 @@
 #include "CoinBufferSubsystem.h"
 
 #include "EngineUtils.h"
+#include "Components/AudioComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
+#include "Core/TestProjectDeveloperSettings.h"
 #include "Player/PlayerCharacter.h"
 
 void UCoinBufferSubsystem::AddCoinBuffers(TArray<FVector> NewLocations, TArray<int32> NewAmounts)
@@ -31,6 +33,16 @@ void UCoinBufferSubsystem::RemoveCoinBuffer(int Element)
 		WorldISMComponent->RemoveInstanceById(InstanceIDs[Element]);
 		InstanceIDs.RemoveAt(Element);
 	}
+}
+
+void UCoinBufferSubsystem::PlayPickupSound()
+{
+	if (!PickupAudioComponent->IsPlaying())
+	{
+		PickupAudioComponent->Play();
+	}
+		
+	PickupAudioComponent->SetTriggerParameter(PickupSoundParameter);
 }
 
 void UCoinBufferSubsystem::Tick(float DeltaTime)
@@ -66,6 +78,11 @@ void UCoinBufferSubsystem::Tick(float DeltaTime)
 		TotalCoins += Amounts[ProcessList[i]];
 		RemoveCoinBuffer(ProcessList[i]);
 	}
+
+	if (TotalCoins > 0)
+	{
+		PlayPickupSound();
+	}
 	
 	for (int32 i = Locations.Num() - 1; i >= 0; --i)
 	{
@@ -79,12 +96,30 @@ void UCoinBufferSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	
 	UWorld* World = GetWorld();
 	
-	//TODO: Async load instead
-	FSoftObjectPath MeshPath(TEXT("/Game/ExampleContent/Meshes/SM_Pickup_Coin.SM_Pickup_Coin"));
-	UStaticMesh* LoadedMesh = Cast<UStaticMesh>(MeshPath.TryLoad());
+	const UTestProjectDeveloperSettings* Settings = GetDefault<UTestProjectDeveloperSettings>();
+	
+	PickupSoundParameter = Settings->CoinBufferPickupSoundParameter;
 	
 	WorldISMComponent = NewObject<UInstancedStaticMeshComponent>(World, NAME_None, RF_Transient);
 	WorldISMComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WorldISMComponent->SetStaticMesh(LoadedMesh);
 	WorldISMComponent->RegisterComponentWithWorld(World);
+	
+	auto coinBufferHandle = Settings->CoinBufferMesh.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &ThisClass::OnCoinBufferMeshLoaded));
+	
+	PickupAudioComponent = NewObject<UAudioComponent>(World, NAME_None, RF_Transient);
+	PickupAudioComponent->bAutoActivate = false;
+	PickupAudioComponent->RegisterComponentWithWorld(World);
+	
+	auto pickupSoundHandle = Settings->CoinBufferPickupSound.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &ThisClass::OnPickupSoundLoaded));
+
+}
+
+void UCoinBufferSubsystem::OnCoinBufferMeshLoaded(const FSoftObjectPath& SoftObjectPath, UObject* LoadedObject)
+{
+	WorldISMComponent->SetStaticMesh(Cast<UStaticMesh>(LoadedObject));
+}
+
+void UCoinBufferSubsystem::OnPickupSoundLoaded(const FSoftObjectPath& SoftObjectPath, UObject* LoadedObject)
+{
+	PickupAudioComponent->SetSound(Cast<USoundBase>(LoadedObject));
 }
