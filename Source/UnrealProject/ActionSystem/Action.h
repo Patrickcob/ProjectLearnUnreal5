@@ -41,6 +41,11 @@ public:
 	
 	FGameplayTag GetActionName() const { return ActionName; }
 	
+	virtual bool ImplementsGetWorld() const override
+	{
+		return true;
+	}
+	
 	float CoolDownTimeRemaining() const { return FMath::Max(0.0f, CoolDownUntil - GetWorld()->GetTimeSeconds()); }
 	
 	UFUNCTION(BlueprintCallable, Category = "Action")

@@ -11,6 +11,8 @@
 
 void UCoinBufferSubsystem::AddCoinBuffers(TArray<FVector> NewLocations, TArray<int32> NewAmounts)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UCoinBufferSubsystem::AddCoinBuffers);
+	
 	Locations.Append(NewLocations);
 	Amounts.Append(NewAmounts);
 	
@@ -26,12 +28,14 @@ void UCoinBufferSubsystem::AddCoinBuffers(TArray<FVector> NewLocations, TArray<i
 
 void UCoinBufferSubsystem::RemoveCoinBuffer(int Element)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UCoinBufferSubsystem::RemoveCoinBuffer);
+	
 	if (Locations.IsValidIndex(Element) && Amounts.IsValidIndex(Element))
 	{
-		Locations.RemoveAt(Element);
-		Amounts.RemoveAt(Element);
+		Locations.RemoveAtSwap(Element, EAllowShrinking::No);
+		Amounts.RemoveAtSwap(Element, EAllowShrinking::No);
 		WorldISMComponent->RemoveInstanceById(InstanceIDs[Element]);
-		InstanceIDs.RemoveAt(Element);
+		InstanceIDs.RemoveAtSwap(Element, EAllowShrinking::No);
 	}
 }
 
@@ -47,6 +51,8 @@ void UCoinBufferSubsystem::PlayPickupSound()
 
 void UCoinBufferSubsystem::Tick(float DeltaTime)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UCoinBufferSubsystem::Tick);
+	
 	Super::Tick(DeltaTime);
 	
 	UWorld* World = GetWorld();
@@ -58,7 +64,7 @@ void UCoinBufferSubsystem::Tick(float DeltaTime)
 		break;
 	}
 	
-	const float PickupRadius = 100.0f;
+	const float PickupRadius = 200.0f;
 	
 	TArray<int32> ProcessList;
 
@@ -102,12 +108,14 @@ void UCoinBufferSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	
 	WorldISMComponent = NewObject<UInstancedStaticMeshComponent>(World, NAME_None, RF_Transient);
 	WorldISMComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WorldISMComponent->SetAffectDistanceFieldLighting(false);
 	WorldISMComponent->RegisterComponentWithWorld(World);
 	
 	auto coinBufferHandle = Settings->CoinBufferMesh.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &ThisClass::OnCoinBufferMeshLoaded));
 	
 	PickupAudioComponent = NewObject<UAudioComponent>(World, NAME_None, RF_Transient);
 	PickupAudioComponent->bAutoActivate = false;
+	PickupAudioComponent->bAllowSpatialization = false;
 	PickupAudioComponent->RegisterComponentWithWorld(World);
 	
 	auto pickupSoundHandle = Settings->CoinBufferPickupSound.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &ThisClass::OnPickupSoundLoaded));

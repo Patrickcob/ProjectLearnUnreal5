@@ -20,6 +20,9 @@ public:
 	UPROPERTY(Transient, BlueprintReadOnly, Category="Status Effects")
 	bool bIsSprinting;
 	
+	UPROPERTY(Transient, BlueprintReadOnly, Category="Status Effects")
+	bool bIsStunned;
+	
 	virtual void NativeInitializeAnimation() override;
 	
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;

@@ -13,4 +13,5 @@ namespace SharedGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Attribute_MaxRage, "Attribute.MaxRage");
 	
 	UE_DEFINE_GAMEPLAY_TAG(StatusEffect_Sprinting, "StatusEffect.Sprinting");
+	UE_DEFINE_GAMEPLAY_TAG(StatusEffect_Stunned, "StatusEffect.Stunned");
 }

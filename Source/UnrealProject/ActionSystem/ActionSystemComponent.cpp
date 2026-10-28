@@ -4,6 +4,7 @@
 #include "ActionSystemComponent.h"
 
 #include "Action.h"
+#include "ActionEffect.h"
 #include "AttributeSet.h"
 #include "SharedGameplayTags.h"
 
@@ -54,6 +55,37 @@ void UActionSystemComponent::RemoveDynamicAttributeChangedDelegate(const FOnAttr
 	}
 }
 
+void UActionSystemComponent::RemoveAction(FGameplayTag ActionNameToRemove)
+{
+	TObjectPtr<UAction>* Action = Actions.Find(ActionNameToRemove);
+	if (Action)
+	{
+		if ((*Action)->IsRunning)
+		{
+			(*Action)->StopAction();
+		}
+		
+		int32 NumRemoved = Actions.Remove(ActionNameToRemove);
+		ensure(NumRemoved == 1);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Action %s not found"), *ActionNameToRemove.ToString());
+	}
+}
+
+void UActionSystemComponent::GrantAction(TSubclassOf<UAction> ActionClass)
+{
+	UAction* NewAction = NewObject<UAction>(this, ActionClass);
+	Actions.Add(NewAction->GetActionName(), NewAction);
+			
+	if (NewAction->IsA(UActionEffect::StaticClass()))
+	{
+		ensure(NewAction->CanStart());
+		NewAction->StartAction();
+	}
+}
+
 void UActionSystemComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
@@ -77,8 +109,7 @@ void UActionSystemComponent::InitializeComponent()
 	{
 		if (ActionClass)
 		{
-			UAction* NewAction = NewObject<UAction>(this, ActionClass);
-			Actions.Add(NewAction->GetActionName(), NewAction);
+			GrantAction(ActionClass);
 		}
 	}
 }

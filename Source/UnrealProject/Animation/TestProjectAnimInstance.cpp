@@ -18,4 +18,5 @@ void UTestProjectAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Super::NativeUpdateAnimation(DeltaSeconds);
 	
 	bIsSprinting = ActionSystemComponent && ActionSystemComponent->ActiveTags.HasTag(SharedGameplayTags::StatusEffect_Sprinting);
+	bIsStunned = ActionSystemComponent && ActionSystemComponent->ActiveTags.HasTag(SharedGameplayTags::StatusEffect_Stunned);
 }

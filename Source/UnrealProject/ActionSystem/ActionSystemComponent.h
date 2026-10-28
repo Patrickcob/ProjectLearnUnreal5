@@ -63,6 +63,11 @@ public:
 	UFUNCTION(BlueprintCallable,DisplayName="Remove Dynamic Attribute Changed Delegate", Category = "Action System", meta=(Keywords="events,delegate"))
 	void RemoveDynamicAttributeChangedDelegate(const FOnAttributeDynamicChanged& InDelegate);
 	
+	void RemoveAction(FGameplayTag ActionNameToRemove);
+	
+	UFUNCTION(BlueprintCallable, Category = "Action System")
+	void GrantAction(TSubclassOf<UAction> ActionClass);
+
 protected:
 	
 	UPROPERTY(EditAnywhere, Instanced, NoClear)
