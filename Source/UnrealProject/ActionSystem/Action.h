@@ -39,6 +39,8 @@ public:
 	UPROPERTY(Transient)
 	bool IsRunning = false;
 	
+	const FGameplayTagContainer& GetBlockedTags() const { return BlockedTags; }
+	
 	FGameplayTag GetActionName() const { return ActionName; }
 	
 	virtual bool ImplementsGetWorld() const override

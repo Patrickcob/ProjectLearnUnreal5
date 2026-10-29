@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
 #include "TestProjectAnimInstance.generated.h"
 
@@ -15,7 +16,8 @@ class UNREALPROJECT_API UTestProjectAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
-public:
+public:	
+	virtual void NativeBeginPlay() override;
 	
 	UPROPERTY(Transient, BlueprintReadOnly, Category="Status Effects")
 	bool bIsSprinting;
@@ -24,10 +26,10 @@ public:
 	bool bIsStunned;
 	
 	virtual void NativeInitializeAnimation() override;
-	
-	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-	
 protected:
+	UFUNCTION()
+	void OnGameplayTagCountChanged(FGameplayTag UpdatedTag, int32 NewCount);
+	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UActionSystemComponent> ActionSystemComponent;
 };

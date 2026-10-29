@@ -6,6 +6,16 @@
 #include "SharedGameplayTags.h"
 #include "ActionSystem/ActionSystemComponent.h"
 
+void UTestProjectAnimInstance::NativeBeginPlay()
+{
+	Super::NativeBeginPlay();
+	
+	if (ActionSystemComponent)
+	{
+		ActionSystemComponent->OnGameplayTagCountChanged.AddDynamic(this, &UTestProjectAnimInstance::OnGameplayTagCountChanged);
+	}
+}
+
 void UTestProjectAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -13,10 +23,14 @@ void UTestProjectAnimInstance::NativeInitializeAnimation()
 	ActionSystemComponent = GetOwningActor()->FindComponentByClass<UActionSystemComponent>();
 }
 
-void UTestProjectAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+void UTestProjectAnimInstance::OnGameplayTagCountChanged(FGameplayTag UpdatedTag, int32 NewCount)
 {
-	Super::NativeUpdateAnimation(DeltaSeconds);
-	
-	bIsSprinting = ActionSystemComponent && ActionSystemComponent->ActiveTags.HasTag(SharedGameplayTags::StatusEffect_Sprinting);
-	bIsStunned = ActionSystemComponent && ActionSystemComponent->ActiveTags.HasTag(SharedGameplayTags::StatusEffect_Stunned);
+	if (UpdatedTag == SharedGameplayTags::StatusEffect_Sprinting)
+	{
+		bIsSprinting = NewCount > 0;
+	}
+	else if (UpdatedTag == SharedGameplayTags::StatusEffect_Stunned)
+	{
+		bIsStunned = NewCount > 0;
+	}
 }

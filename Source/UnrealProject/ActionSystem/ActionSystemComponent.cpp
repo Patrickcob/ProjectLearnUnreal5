@@ -74,6 +74,32 @@ void UActionSystemComponent::RemoveAction(FGameplayTag ActionNameToRemove)
 	}
 }
 
+void UActionSystemComponent::AppendActiveTags(FGameplayTagContainer TagsToAppend)
+{
+	ActiveTags.AppendTags(TagsToAppend);
+	
+	CheckAgainstBlockedTags(TagsToAppend);
+	
+	for (auto Tag : TagsToAppend)
+	{
+		OnGameplayTagCountChanged.Broadcast(Tag, 1);
+	}
+}
+
+void UActionSystemComponent::RemoveActiveTags(FGameplayTagContainer TagsToRemove)
+{
+	int32 PreviousCount = ActiveTags.Num();
+	
+	ActiveTags.RemoveTags(TagsToRemove);
+	
+	ensure((PreviousCount - ActiveTags.Num()) == TagsToRemove.Num());
+	
+	for (auto Tag : TagsToRemove)
+	{
+		OnGameplayTagCountChanged.Broadcast(Tag, 0);
+	}
+}
+
 void UActionSystemComponent::GrantAction(TSubclassOf<UAction> ActionClass)
 {
 	UAction* NewAction = NewObject<UAction>(this, ActionClass);
@@ -83,6 +109,17 @@ void UActionSystemComponent::GrantAction(TSubclassOf<UAction> ActionClass)
 	{
 		ensure(NewAction->CanStart());
 		NewAction->StartAction();
+	}
+}
+
+void UActionSystemComponent::CheckAgainstBlockedTags(const FGameplayTagContainer& TagsToCheck)
+{
+	for (const TTuple<FGameplayTag, TObjectPtr<UAction>> Tuple : Actions)
+	{
+		if (Tuple.Value->IsRunning && TagsToCheck.HasAny(Tuple.Value->GetBlockedTags()))
+		{
+			Tuple.Value->StopAction();
+		}
 	}
 }
 

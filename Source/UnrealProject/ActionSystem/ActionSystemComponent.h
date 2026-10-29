@@ -22,6 +22,7 @@ enum EAttributeModifyType
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnAttributeChanged, FGameplayTag /*AttributeTag*/, float /*NewAttributeValue*/, float /*OldAttributeValue*/);
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnAttributeDynamicChanged, FGameplayTag, AttributeTag, float, NewAttributeValue, float, OldAttributeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGameplayTagCountChanged, FGameplayTag, UpdatedTag, int32, NewCount);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class UNREALPROJECT_API UActionSystemComponent : public UActorComponent
@@ -47,15 +48,15 @@ public:
 	// Sets default values for this component's properties
 	UActionSystemComponent();
 	
-	UPROPERTY(Transient)
-	FGameplayTagContainer ActiveTags;
-	
 	FAttribute* GetAttribute(FGameplayTag InAttributeTag) const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Action System")
 	float GetAttributeValue(FGameplayTag InAttributeTag) const;
 	
 	FOnAttributeChanged& GetAttributeChangedDelegate(FGameplayTag InAttributeTag) { return AttributeChangedDelegates.FindOrAdd(InAttributeTag); }
+	
+	UPROPERTY(BlueprintAssignable, Category = "Action System")
+	FOnGameplayTagCountChanged OnGameplayTagCountChanged;
 	
 	UFUNCTION(BlueprintCallable,DisplayName="Add Dynamic Attribute Changed Delegate", Category = "Action System", meta=(Keywords="events,delegate"))
 	void AddDynamicAttributeChangedDelegate(const FGameplayTag InAttributeTag, const FOnAttributeDynamicChanged& InDelegate);
@@ -65,10 +66,20 @@ public:
 	
 	void RemoveAction(FGameplayTag ActionNameToRemove);
 	
+	void AppendActiveTags(FGameplayTagContainer TagsToAppend);
+	void RemoveActiveTags(FGameplayTagContainer TagsToRemove);
+	
 	UFUNCTION(BlueprintCallable, Category = "Action System")
 	void GrantAction(TSubclassOf<UAction> ActionClass);
+	
+	const FGameplayTagContainer& GetActiveTags() const { return ActiveTags; }
 
 protected:
+	
+	void CheckAgainstBlockedTags(const FGameplayTagContainer& TagsToCheck);
+	
+	UPROPERTY(Transient)
+	FGameplayTagContainer ActiveTags;
 	
 	UPROPERTY(EditAnywhere, Instanced, NoClear)
 	TObjectPtr<UAttributeSet> Attributes;

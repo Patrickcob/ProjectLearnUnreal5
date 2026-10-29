@@ -12,7 +12,7 @@ UActionSystemComponent* UAction::GetOwningComponent() const
 
 bool UAction::CanStart() const
 {
-	return !GetOwningComponent()->ActiveTags.HasAny(BlockedTags) 
+	return !GetOwningComponent()->GetActiveTags().HasAny(BlockedTags) 
 	&& !IsRunning 
 	&& FMath::IsNearlyZero(CoolDownTimeRemaining())
 	&& GetOwningComponent()->HasEnoughAttributes(AttributesConsumedOnStart);
@@ -25,15 +25,18 @@ void UAction::StopAction_Implementation()
 	UE_LOGFMT(LogTemp, Log, "[{GameTime}]Action {ActionName} stopped.", GameTime.GetWorldTimeSeconds(), ActionName.ToString());
 	
 	CoolDownUntil = GetWorld()->GetTimeSeconds() + CoolDownTime;
-	IsRunning = false;
 	
-	GetOwningComponent()->ActiveTags.RemoveTags(GrantsTags);
+	GetOwningComponent()->RemoveActiveTags(GrantsTags);
+	
+	IsRunning = false;
 }
 
 void UAction::StartAction_Implementation()
 {
 	auto GameTime = GetWorld()->GetTime();
 	
+	GetOwningComponent()->AppendActiveTags(GrantsTags);
+
 	// Consume attributes
 	for (const TPair<FGameplayTag, float>& AttributeCost : AttributesConsumedOnStart)
 	{
@@ -53,6 +56,4 @@ void UAction::StartAction_Implementation()
 	
 	UE_LOGFMT(LogTemp, Log, "[{GameTime}]Action {ActionName} started.", GameTime.GetWorldTimeSeconds(), ActionName.ToString());
 	IsRunning = true;
-	
-	GetOwningComponent()->ActiveTags.AppendTags(GrantsTags);
 }
