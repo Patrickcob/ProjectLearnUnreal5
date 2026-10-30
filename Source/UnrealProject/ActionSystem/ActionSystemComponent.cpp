@@ -67,6 +67,7 @@ void UActionSystemComponent::RemoveAction(FGameplayTag ActionNameToRemove)
 		
 		int32 NumRemoved = Actions.Remove(ActionNameToRemove);
 		ensure(NumRemoved == 1);
+		Action->Get()->MarkAsGarbage();
 	}
 	else
 	{
