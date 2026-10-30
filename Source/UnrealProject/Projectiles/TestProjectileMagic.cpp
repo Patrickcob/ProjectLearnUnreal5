@@ -5,6 +5,8 @@
 
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "ActionSystem/ActionEffect.h"
+#include "ActionSystem/ActionSystemComponent.h"
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -27,6 +29,15 @@ void ATestProjectileMagic::OnHit(UPrimitiveComponent* HitComponent, AActor* Othe
 	FVector HitFromDirection = GetActorRotation().Vector();
 	
 	UGameplayStatics::ApplyPointDamage(OtherActor, 10.0f, HitFromDirection, Hit, GetInstigatorController(), this, DamageTypeClass);
+
+	if (EffectOnHit)
+	{
+		UActionSystemComponent* ActionComponent = OtherActor->FindComponentByClass<UActionSystemComponent>();
+		if (ActionComponent)
+		{
+			ActionComponent->GrantAction(EffectOnHit);
+		}
+	}
 	
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ExplosionSystem, GetActorLocation());
 	

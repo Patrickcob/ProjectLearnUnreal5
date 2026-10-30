@@ -25,11 +25,11 @@ void UTestProjectAnimInstance::NativeInitializeAnimation()
 
 void UTestProjectAnimInstance::OnGameplayTagCountChanged(FGameplayTag UpdatedTag, int32 NewCount)
 {
-	if (UpdatedTag == SharedGameplayTags::StatusEffect_Sprinting)
+	if (UpdatedTag.MatchesTag(SharedGameplayTags::StatusEffect_Sprinting))
 	{
 		bIsSprinting = NewCount > 0;
 	}
-	else if (UpdatedTag == SharedGameplayTags::StatusEffect_Stunned)
+	else if (UpdatedTag.MatchesTag(SharedGameplayTags::StatusEffect_Stunned))
 	{
 		bIsStunned = NewCount > 0;
 	}

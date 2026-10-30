@@ -6,6 +6,7 @@
 #include "Projectile.h"
 #include "TestProjectileMagic.generated.h"
 
+class UActionEffect;
 class UNiagaraSystem;
 
 UCLASS(Abstract)
@@ -22,6 +23,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	TObjectPtr<USoundBase> ExplosionSound;
 	
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	TSubclassOf<UActionEffect> EffectOnHit;
 
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

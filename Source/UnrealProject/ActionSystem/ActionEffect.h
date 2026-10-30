@@ -17,9 +17,27 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effect")
 	float Duration = 0.0f;
 	
-	FTimerHandle DurationTimerHandle;
+	UPROPERTY(EditDefaultsOnly, Category="Effect") 
+	float Period = 0.0f;
 	
+	UPROPERTY(Transient, BlueprintReadOnly, Category="Effect") 
+	int32 StackCount = 1;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effect")
+	bool bResetDurationOnStackIncrease = true;
+	
+	FTimerHandle DurationTimerHandle;
+	FTimerHandle PeriodTimerHandle;
+	
+	UFUNCTION(BlueprintNativeEvent, Category="Effect")
+	void ExecutePeriodicEffect();
+	
+	void ResetDuration();
+
+
 public:
+	void IncrementStackSize();
+	
 	virtual void StartAction_Implementation() override;
 	
 	virtual void StopAction_Implementation() override;

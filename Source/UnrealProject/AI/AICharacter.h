@@ -26,7 +26,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UActionSystemComponent> ActionSystemComponent;
 
-
+	UFUNCTION()
+	void OnGameplayTagUpdated(FGameplayTag UpdatedTag, int32 NewCount);
+	
+	UPROPERTY(EditDefaultsOnly, Category=Animation)
+	TObjectPtr<UAnimMontage> StunnedAnimation;
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Death")
 	TObjectPtr<UAnimMontage> DeathMontage;

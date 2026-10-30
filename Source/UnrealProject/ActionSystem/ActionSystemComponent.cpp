@@ -102,10 +102,27 @@ void UActionSystemComponent::RemoveActiveTags(FGameplayTagContainer TagsToRemove
 
 void UActionSystemComponent::GrantAction(TSubclassOf<UAction> ActionClass)
 {
+	const bool bIsEffectClass = ActionClass->IsChildOf(UActionEffect::StaticClass());
+	if (bIsEffectClass)
+	{
+		for (const TTuple<FGameplayTag, TObjectPtr<UAction>> Tuple : Actions)
+		{
+			UActionEffect* Effect = Cast<UActionEffect>(Tuple.Value);
+			if (Effect)
+			{
+				if (Effect->GetClass() == ActionClass)
+				{
+					Effect->IncrementStackSize();
+					return;
+				}
+			}
+		}
+	}
+	
 	UAction* NewAction = NewObject<UAction>(this, ActionClass);
 	Actions.Add(NewAction->GetActionName(), NewAction);
 			
-	if (NewAction->IsA(UActionEffect::StaticClass()))
+	if (bIsEffectClass)
 	{
 		ensure(NewAction->CanStart());
 		NewAction->StartAction();
