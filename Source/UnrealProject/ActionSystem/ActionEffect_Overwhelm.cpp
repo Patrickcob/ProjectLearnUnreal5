@@ -11,6 +11,7 @@ UActionEffect_Overwhelm::UActionEffect_Overwhelm()
 {
 	// Since the stun for monsters is entirely in C++, we can assign it directly here instead of a Blueprint Class
 	EffectOnThreshold = UActionEffect_StunMonster::StaticClass();
+	ActionName = SharedGameplayTags::StatusEffect_Overwhelm;
 	// Note: We do not need any BP derived class for this Overwhelm debuff
 }
 

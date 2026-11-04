@@ -31,3 +31,21 @@ bool UTestProjectGameplayStatics::IsLowHealth(UActionSystemComponent* ActionSyst
 
 	return CurrentHealth->GetValue() < (MaxHealth->GetValue() * LowHealthThreshold);
 }
+
+bool UTestProjectGameplayStatics::IsAlive(AActor* Actor)
+{
+	if (!Actor)
+	{
+		return false;
+	}
+	
+	UActionSystemComponent* ActionSystemComponent = Actor->FindComponentByClass<UActionSystemComponent>();
+	if (!ActionSystemComponent)
+	{
+		return false;
+	}
+
+	FAttribute* CurrentHealth = ActionSystemComponent->GetAttribute(SharedGameplayTags::Attribute_Health);
+
+	return CurrentHealth->GetValue() > 0.0f;
+}

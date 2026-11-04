@@ -59,12 +59,7 @@ void UActionSystemComponent::RemoveAction(FGameplayTag ActionNameToRemove)
 {
 	TObjectPtr<UAction>* Action = Actions.Find(ActionNameToRemove);
 	if (Action)
-	{
-		if ((*Action)->IsRunning)
-		{
-			(*Action)->StopAction();
-		}
-		
+	{		
 		int32 NumRemoved = Actions.Remove(ActionNameToRemove);
 		ensure(NumRemoved == 1);
 		Action->Get()->MarkAsGarbage();

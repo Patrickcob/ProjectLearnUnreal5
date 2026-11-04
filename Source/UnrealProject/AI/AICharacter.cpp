@@ -7,6 +7,7 @@
 #include "SharedGameplayTags.h"
 #include "ActionSystem/ActionSystemComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
+#include "Core/TestProjectGameInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 
@@ -18,6 +19,30 @@ AAICharacter::AAICharacter()
 	ActionSystemComponent->SetDefaultAttributes(UAIAttributeSet::StaticClass());
 	
 	ActionSystemComponent->OnGameplayTagCountChanged.AddDynamic(this, &ThisClass::OnGameplayTagUpdated);
+}
+
+void AAICharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	if (EndPlayReason == EEndPlayReason::Destroyed)
+	{
+		UTestProjectGameInstance* GI = GetGameInstance<UTestProjectGameInstance>();
+		if (GI)	
+		{
+			GI->AliveMonsters.RemoveSingleSwap(this, EAllowShrinking::No);
+		}
+	}
+}
+
+void AAICharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UTestProjectGameInstance* GI = GetGameInstance<UTestProjectGameInstance>();
+	if (GI)
+	{
+		GI->AliveMonsters.Add(this);
+	}
 }
 
 void AAICharacter::PostInitializeComponents()
@@ -36,6 +61,8 @@ void AAICharacter::OnHealthChanged(FGameplayTag InAttributeTag, float NewHealth,
 	if (FMath::IsNearlyZero(NewHealth))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AICharacter Died"));
+		// Destroy actor
+		Destroy();
 	}
 }
 

@@ -19,4 +19,7 @@ public:
 	
 	static bool IsFullHealth(UActionSystemComponent * ActionSystemComponent);
 	static bool IsLowHealth(UActionSystemComponent * ActionSystemComponent, float LowHealthThreshold);
+	
+	UFUNCTION(BlueprintCallable, Category="Action System")
+	static bool IsAlive(AActor* Actor);
 };

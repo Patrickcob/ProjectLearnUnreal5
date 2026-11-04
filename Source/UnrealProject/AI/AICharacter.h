@@ -7,9 +7,10 @@
 #include "GameFramework/Character.h"
 #include "AICharacter.generated.h"
 
+class UAIDataAsset;
 class UActionSystemComponent;
 
-UCLASS()
+UCLASS(Abstract)
 class UNREALPROJECT_API AAICharacter : public ACharacter
 {
 	GENERATED_BODY()
@@ -17,6 +18,17 @@ class UNREALPROJECT_API AAICharacter : public ACharacter
 public:
 	AAICharacter();
 	
+	UAIDataAsset* GetMonsterAsset() const { return MonsterAsset; }
+	
+	void SetMonsterAsset(UAIDataAsset* InMonsterAsset)
+	{
+		check(InMonsterAsset != nullptr);
+		MonsterAsset = InMonsterAsset;
+	}
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void BeginPlay() override;
+
 	virtual void PostInitializeComponents() override;
 	
 	void OnHealthChanged(FGameplayTag InGameplayTag, float NewHealth, float OldHealth);
@@ -32,6 +44,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category=Animation)
 	TObjectPtr<UAnimMontage> StunnedAnimation;
 protected:
+	UPROPERTY(Transient)
+	TObjectPtr<UAIDataAsset> MonsterAsset;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Death")
 	TObjectPtr<UAnimMontage> DeathMontage;
 	
