@@ -12,6 +12,28 @@
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "Kismet/GameplayStatics.h"
 
+
+TAutoConsoleVariable<bool> CVarGameBotSpawnEnabled(
+	TEXT("game.BotSpawnEnabled"),
+	true,
+	TEXT("Enable or disable bot spawning in the game."),
+	ECVF_Cheat
+);
+
+TAutoConsoleVariable<bool> CVarGameEnableOverrideSpawnMax(
+	TEXT("game.EnableOverrideSpawnMax"),
+	false,
+	TEXT("Enable or disable overriding the maximum number of bots that can be spawned in the game."),
+	ECVF_Cheat
+);
+
+TAutoConsoleVariable<int32> CVarGameBotSpawnMax(
+	TEXT("game.BotSpawnMax"),
+	5,
+	TEXT("Maximum number of bots that can be spawned in the game."),
+	ECVF_Cheat
+);
+
 APrimaryGameMode::APrimaryGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -52,7 +74,8 @@ void APrimaryGameMode::Tick(float DeltaSeconds)
 bool APrimaryGameMode::TrySpawnMonster(FSpawnDirectorData& DirectorData)
 {
 	UTestProjectGameInstance* GI = GetGameInstance<UTestProjectGameInstance>();
-	if (GI->AliveMonsters.Num() >= MaxBotLimit)
+	int32 BotLimit = CVarGameEnableOverrideSpawnMax.GetValueOnGameThread() ? CVarGameBotSpawnMax.GetValueOnGameThread() : MaxBotLimit;
+	if (GI->AliveMonsters.Num() >= BotLimit)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Max bot limit reached: %d"), GI->AliveMonsters.Num());
 		return false;
@@ -132,6 +155,10 @@ void APrimaryGameMode::OnSpawnLocationQueryFinished(TSharedPtr<FEnvQueryResult> 
 
 void APrimaryGameMode::OnMonsterClassLoaded(const FSoftObjectPath& SoftObjectPath, UObject* LoadedObject, FVector SpawnLocation, FMonsterSpawnData* SelectedMonster)
 {
+	if (!CVarGameBotSpawnEnabled.GetValueOnGameThread())
+	{
+		return;
+	}
 	
 	if (LoadedObject)
 	{

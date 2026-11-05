@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Core/TestProjectGameMode.h"
+#include "GameModes/TestProjectGameMode.h"
 #include "PrimaryGameMode.generated.h"
 
 struct FSpawnDirectorData;
