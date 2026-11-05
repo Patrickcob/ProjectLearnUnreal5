@@ -30,7 +30,7 @@ void ATestProjectileMagic::OnHit(UPrimitiveComponent* HitComponent, AActor* Othe
 	
 	UGameplayStatics::ApplyPointDamage(OtherActor, 10.0f, HitFromDirection, Hit, GetInstigatorController(), this, DamageTypeClass);
 
-	if (EffectOnHit)
+	if (EffectOnHit && IsValid(OtherActor))
 	{
 		UActionSystemComponent* ActionComponent = OtherActor->FindComponentByClass<UActionSystemComponent>();
 		if (ActionComponent)

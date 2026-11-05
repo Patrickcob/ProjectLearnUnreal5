@@ -34,13 +34,13 @@ bool UTestProjectGameplayStatics::IsLowHealth(UActionSystemComponent* ActionSyst
 
 bool UTestProjectGameplayStatics::IsAlive(AActor* Actor)
 {
-	if (!Actor)
+	if (!IsValid(Actor))
 	{
 		return false;
 	}
 	
 	UActionSystemComponent* ActionSystemComponent = Actor->FindComponentByClass<UActionSystemComponent>();
-	if (!ActionSystemComponent)
+	if (!IsValid(ActionSystemComponent))
 	{
 		return false;
 	}

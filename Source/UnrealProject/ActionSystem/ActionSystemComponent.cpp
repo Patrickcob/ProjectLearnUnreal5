@@ -98,6 +98,12 @@ void UActionSystemComponent::RemoveActiveTags(FGameplayTagContainer TagsToRemove
 
 void UActionSystemComponent::GrantAction(TSubclassOf<UAction> ActionClass)
 {
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || Owner->IsActorBeingDestroyed())
+	{
+		return;
+	}
+	
 	const bool bIsEffectClass = ActionClass->IsChildOf(UActionEffect::StaticClass());
 	if (bIsEffectClass)
 	{
@@ -154,14 +160,6 @@ void UActionSystemComponent::InitializeComponent()
 		FGameplayTag Tag = FGameplayTag::RequestGameplayTag(Name);
 		AttributesByTag.Add(Tag, FoundAttribute);
 	}
-	
-	for (const TSubclassOf<UAction>& ActionClass : DefaultActions)
-	{
-		if (ActionClass)
-		{
-			GrantAction(ActionClass);
-		}
-	}
 }
 
 void UActionSystemComponent::SetDefaultAttributes(TSubclassOf<UAttributeSet> InAttributeSetClass)
@@ -180,6 +178,33 @@ void UActionSystemComponent::BeginPlay()
 	{
 		Attributes->InitializeAttributes();
 	}
+	
+	for (const TSubclassOf<UAction>& ActionClass : DefaultActions)
+	{
+		if (ActionClass)
+		{
+			GrantAction(ActionClass);
+		}
+	}
+}
+
+void UActionSystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld())
+	{
+		FTimerManager& TimerManager = World->GetTimerManager();
+		ForEachObjectWithOuter(this, [&TimerManager](UObject* Obj)
+		{
+			TimerManager.ClearAllTimersForObject(Obj);
+			if (UAction* Action = Cast<UAction>(Obj))
+			{
+				Action->IsRunning = false;
+			}
+		}, false);
+	}
+
+	Actions.Empty();
+	Super::EndPlay(EndPlayReason);
 }
 
 void UActionSystemComponent::ApplyAttributeChange(FGameplayTag InAttributeTag, float Delta, EAttributeModifyType ModifyType /*= Base*/)

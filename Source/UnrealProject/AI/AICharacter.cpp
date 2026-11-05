@@ -17,7 +17,7 @@ AAICharacter::AAICharacter()
 {
 	ActionSystemComponent = CreateDefaultSubobject<UActionSystemComponent>("ActionSystemComponent");
 	ActionSystemComponent->SetDefaultAttributes(UAIAttributeSet::StaticClass());
-	
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	ActionSystemComponent->OnGameplayTagCountChanged.AddDynamic(this, &ThisClass::OnGameplayTagUpdated);
 }
 

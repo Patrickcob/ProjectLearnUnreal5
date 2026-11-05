@@ -24,27 +24,21 @@ void APrimaryGameMode::Tick(float DeltaSeconds)
 
 	float TotalElapsedTime = GetWorld()->TimeSeconds;
 	
-	UTestProjectGameInstance* GI = GetGameInstance<UTestProjectGameInstance>();
-	if (GI->AliveMonsters.Num() > MaxBotLimit)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Max bot limit reached: %d"), GI->AliveMonsters.Num());
-		return;
-	}
-	
 	int32 KeyID = ONSCREENDEBUGKEY_SPAWN_DIRECTOR;
 	for (FSpawnDirectorData& DirectorData : SpawnDirectors)
 	{
 		if (DirectorData.SpawnDataTable == nullptr)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Spawn Data Table is not set"));
-			return;
+			continue;
 		}
 
 		float CreditsPerSecond = DirectorData.CreditGainCurve.GetRichCurve()->Eval(TotalElapsedTime) * DeltaSeconds;
 		DirectorData.CurrentCredits += CreditsPerSecond;
 		
 		GEngine->AddOnScreenDebugMessage(KeyID, PrimaryActorTick.TickInterval, FColor::Green, FString::Printf(TEXT("Current Credits: %f\nNext Tick Time: %f"), DirectorData.CurrentCredits, DirectorData.NextTickTime));
-
+		KeyID++;
+		
 		if (DirectorData.NextTickTime > TotalElapsedTime)
 		{
 			continue;			
@@ -52,19 +46,20 @@ void APrimaryGameMode::Tick(float DeltaSeconds)
 		
 		bool bSuccess = TrySpawnMonster(DirectorData);
 		DirectorData.NextTickTime = TotalElapsedTime + (bSuccess ? DirectorData.TickInterval : DirectorData.CoolDown);
-		
-		
-		KeyID++;
 	}
 }
 
 bool APrimaryGameMode::TrySpawnMonster(FSpawnDirectorData& DirectorData)
 {
+	UTestProjectGameInstance* GI = GetGameInstance<UTestProjectGameInstance>();
+	if (GI->AliveMonsters.Num() >= MaxBotLimit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Max bot limit reached: %d"), GI->AliveMonsters.Num());
+		return false;
+	}
+	
 	TArray<FMonsterSpawnData*> SpawnDataRows;
 	DirectorData.SpawnDataTable->GetAllRows("SelectMonster", SpawnDataRows);
-	
-	//int32 RandomIndex = DirectorData.RandomStreamMonsterSelection.RandRange(0, SpawnDataRows.Num() - 1);
-	//FMonsterSpawnData* RandomSpawnData = SpawnDataRows[RandomIndex];
 
 	float TotalWeight = 0.0f;
 	for (FMonsterSpawnData* SpawnDataRow : SpawnDataRows)
@@ -152,11 +147,14 @@ void APrimaryGameMode::OnMonsterClassLoaded(const FSoftObjectPath& SoftObjectPat
 		SpawnedMonster->SetMonsterAsset(MonsterDataAsset);
 		
 		UGameplayStatics::FinishSpawningActor(SpawnedMonster, FTransform(SpawnLocation));
-		
-		UActionSystemComponent* ActionSystemComponent = SpawnedMonster->ActionSystemComponent;
-		for (TSubclassOf<UAction> Action : MonsterDataAsset->MonsterActions)
+
+		if (IsValid(SpawnedMonster))
 		{
-			ActionSystemComponent->GrantAction(Action);
+			UActionSystemComponent* ActionSystemComponent = SpawnedMonster->ActionSystemComponent;
+			for (TSubclassOf<UAction> Action : MonsterDataAsset->MonsterActions)
+			{
+				ActionSystemComponent->GrantAction(Action);
+			}
 		}
 	}
 	else

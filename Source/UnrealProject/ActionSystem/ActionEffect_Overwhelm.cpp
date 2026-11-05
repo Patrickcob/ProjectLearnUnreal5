@@ -62,8 +62,7 @@ void UActionEffect_Overwhelm::StartAction_Implementation()
 {
 	Super::StartAction_Implementation();
 	
-	HealthDelegateHandle = GetOwningComponent()->GetAttributeChangedDelegate(SharedGameplayTags::Attribute_Health).AddUObject(this, 
-		&ThisClass::OnHealthChanged);
+	HealthDelegateHandle = GetOwningComponent()->GetAttributeChangedDelegate(SharedGameplayTags::Attribute_Health).AddUObject(this, &ThisClass::OnHealthChanged);
 }
 
 void UActionEffect_Overwhelm::StopAction_Implementation()
