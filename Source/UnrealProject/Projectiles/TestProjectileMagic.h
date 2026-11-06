@@ -14,6 +14,9 @@ class UNREALPROJECT_API ATestProjectileMagic : public AProjectile
 {
 	GENERATED_BODY()
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float AttackDamage = 10.0f;
+	
 	UPROPERTY(EditDefaultsOnly, Category="Damage")
 	TSubclassOf<UDamageType> DamageTypeClass;
 	

@@ -11,8 +11,10 @@ namespace SharedGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Attribute_MaxHealth, "Attribute.MaxHealth");
 	UE_DEFINE_GAMEPLAY_TAG(Attribute_Rage, "Attribute.Rage");
 	UE_DEFINE_GAMEPLAY_TAG(Attribute_MaxRage, "Attribute.MaxRage");
+	UE_DEFINE_GAMEPLAY_TAG(Attribute_CoinsNumber, "Attribute.CoinsNumber");
 	
 	UE_DEFINE_GAMEPLAY_TAG(StatusEffect_Sprinting, "StatusEffect.Sprinting");
 	UE_DEFINE_GAMEPLAY_TAG(StatusEffect_Stunned, "StatusEffect.Stunned");
 	UE_DEFINE_GAMEPLAY_TAG(StatusEffect_Overwhelm, "StatusEffect.Overwhelm");
+	UE_DEFINE_GAMEPLAY_TAG(StatusEffect_CoinDrop, "StatusEffect.CoinDrop");
 }

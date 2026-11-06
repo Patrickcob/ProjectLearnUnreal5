@@ -8,6 +8,9 @@
 #define COLLISION_PROJECTILE ECC_GameTraceChannel2
 #define COLLISION_BUFFERS ECC_GameTraceChannel3
 
+#define TEAM_ID_PLAYER 0
+#define TEAM_ID_ENEMY 1
+
 class UAIDataAsset;
 class UEnvQuery;
 class UDataTable;
@@ -22,10 +25,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSoftObjectPtr<UAIDataAsset> MonsterDataAsset;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0.0"))
 	float SpawnCost = 0.0f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0.0"))
 	float SpawnWeight = 1.0f;
 };
 
@@ -49,6 +52,12 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category="Spawn System")
 	float CoolDown = 6.0f;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Spawn System")
+	FString DebugDisplay = TEXT("Spawn Director");
+	
+	UPROPERTY(EditDefaultsOnly, Category="Spawn System")
+	FColor DebugColor = FColor::Green;
 	
 	float NextTickTime = 0.0f;
 	

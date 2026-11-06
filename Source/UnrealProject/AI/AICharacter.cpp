@@ -7,9 +7,10 @@
 #include "SharedGameplayTags.h"
 #include "ActionSystem/ActionSystemComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Core/TestProjectGameInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/PawnMovementComponent.h"
+#include "Perception/AISense_Damage.h"
 
 
 // Sets default values
@@ -19,6 +20,17 @@ AAICharacter::AAICharacter()
 	ActionSystemComponent->SetDefaultAttributes(UAIAttributeSet::StaticClass());
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	ActionSystemComponent->OnGameplayTagCountChanged.AddDynamic(this, &ThisClass::OnGameplayTagUpdated);
+}
+
+FGenericTeamId AAICharacter::GetGenericTeamId() const
+{
+	if (auto AIController = GetController<AAIController>())
+	{
+		return AIController->GetGenericTeamId();
+	}
+	
+	return FGenericTeamId::NoTeam;
+	
 }
 
 void AAICharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -58,11 +70,28 @@ void AAICharacter::OnHealthChanged(FGameplayTag InAttributeTag, float NewHealth,
 {
 	UE_LOG(LogTemp, Warning, TEXT("AICharacter Health Changed: OldHealth=%f, NewHealth=%f"), OldHealth, NewHealth);
 
-	if (FMath::IsNearlyZero(NewHealth))
+	if (FMath::IsNearlyZero(NewHealth) && !bIsDead)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AICharacter Died"));
-		// Destroy actor
-		Destroy();
+		bIsDead = true;
+
+		AAIController* AIController = GetController<AAIController>();
+		AIController->GetBrainComponent()->StopLogic("Dead");
+		
+		GetMesh()->bPauseAnims = true;
+		
+		GetMesh()->SetCollisionProfileName("Ragdoll");
+		GetMesh()->SetAllBodiesSimulatePhysics(true);
+		
+		GetCharacterMovement()->DisableMovement();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		UTestProjectGameInstance* GI = GetGameInstance<UTestProjectGameInstance>();
+		if (GI)	
+		{
+			GI->AliveMonsters.RemoveSingleSwap(this, EAllowShrinking::No);
+		}
+		
+		SetLifeSpan(5.0f);
 	}
 }
 
@@ -70,6 +99,8 @@ float AAICharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 	class AController* EventInstigator, AActor* DamageCauser)
 {
 	UE_LOG(LogTemp, Warning, TEXT("AICharacter TakeDamage: DamageAmount=%f"), DamageAmount);
+
+	const ETeamAttitude::Type TeamAttitude = GetTeamAttitudeTowards(*EventInstigator);
 	
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	ActionSystemComponent->ApplyAttributeChange(SharedGameplayTags::Attribute_Health, -ActualDamage, Base);
@@ -84,6 +115,11 @@ float AAICharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 			GetMesh()->SetOverlayMaterialMaxDrawDistance(1);
 		}
 	}, 1.0f, false);
+
+	if (IsValid(EventInstigator) && EventInstigator->GetPawn() != this && TeamAttitude != ETeamAttitude::Friendly)
+	{
+		UAISense_Damage::ReportDamageEvent(this, this, EventInstigator->GetPawn(), FMath::Abs(ActualDamage), EventInstigator->GetPawn()->GetActorLocation(), GetActorLocation());
+	}
 	
 	return ActualDamage;
 }

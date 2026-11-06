@@ -17,7 +17,9 @@ class UNREALPROJECT_API AMinionAIController : public AAIController
 public:
 	AMinionAIController();
 
-protected:
+	virtual void PreRegisterAllComponents() override;
+
+protected:	
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 	

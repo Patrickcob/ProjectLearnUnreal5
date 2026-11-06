@@ -3,12 +3,20 @@
 
 #include "MinionAIController.h"
 
-#include "ActionSystem/ActionSystemComponent.h"
-#include "BehaviorTree/BlackboardComponent.h"
+#include "TestProjectGameTypes.h"
+#include "Perception/AIPerceptionComponent.h"
 
 // Sets default values
 AMinionAIController::AMinionAIController()
 {
+	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
+}
+
+void AMinionAIController::PreRegisterAllComponents()
+{
+	Super::PreRegisterAllComponents();
+	
+	SetGenericTeamId(FGenericTeamId(TEAM_ID_ENEMY));
 }
 
 // Called when the game starts or when spawned
@@ -16,13 +24,5 @@ void AMinionAIController::BeginPlay()
 {
 	Super::BeginPlay();
 	RunBehaviorTree(BehaviorTree);
-	
-	auto PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
-	if (PlayerPawn == nullptr)
-	{
-		return;
-	}
-	
-	GetBlackboardComponent()->SetValueAsObject(FName("TargetActor"), PlayerPawn);
 }
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
@@ -19,13 +20,15 @@ class USpringArmComponent;
 class UCameraComponent;
 
 UCLASS()
-class UNREALPROJECT_API APlayerCharacter : public ACharacter
+class UNREALPROJECT_API APlayerCharacter : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
+
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Death")

@@ -17,7 +17,7 @@ class UNREALPROJECT_API APrimaryGameMode : public ATestProjectGameMode
 {
 	GENERATED_BODY()
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning", meta=(TitleProperty="DebugDisplayName"))
 	TArray<FSpawnDirectorData> SpawnDirectors;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")

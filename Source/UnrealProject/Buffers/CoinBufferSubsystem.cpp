@@ -4,6 +4,9 @@
 #include "CoinBufferSubsystem.h"
 
 #include "EngineUtils.h"
+#include "SharedGameplayTags.h"
+#include "ActionSystem/ActionSystemComponent.h"
+#include "ActionSystem/AttributeSet.h"
 #include "Components/AudioComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Core/TestProjectDeveloperSettings.h"
@@ -58,8 +61,10 @@ void UCoinBufferSubsystem::Tick(float DeltaTime)
 	UWorld* World = GetWorld();
 	
 	FVector PlayerLocation = FVector::ZeroVector;
+	APlayerCharacter* CurrentPlayerCharacter = nullptr;
 	for (APlayerCharacter* PlayerCharacter: TActorRange<APlayerCharacter>(World))
 	{
+		CurrentPlayerCharacter = PlayerCharacter;
 		PlayerLocation = PlayerCharacter->GetActorLocation();
 		break;
 	}
@@ -88,11 +93,14 @@ void UCoinBufferSubsystem::Tick(float DeltaTime)
 	if (TotalCoins > 0)
 	{
 		PlayPickupSound();
-	}
-	
-	for (int32 i = Locations.Num() - 1; i >= 0; --i)
-	{
-		DrawDebugPoint(World, Locations[i], 8.0f, FColor::Yellow);
+		UActionSystemComponent* ActionSystemComponent = CurrentPlayerCharacter->FindComponentByClass<UActionSystemComponent>();
+		if (!IsValid(ActionSystemComponent))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("UCoinBufferSubsystem::Tick: ActionSystemComponent is not valid."));
+			return;
+		}
+		
+		ActionSystemComponent->ApplyAttributeChange(SharedGameplayTags::Attribute_CoinsNumber, TotalCoins, Base);
 	}
 }
 

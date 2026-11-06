@@ -10,6 +10,7 @@
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Perception/AISense_Hearing.h"
 
 // Sets default values
 ATestProjectileMagic::ATestProjectileMagic()
@@ -28,7 +29,13 @@ void ATestProjectileMagic::OnHit(UPrimitiveComponent* HitComponent, AActor* Othe
 {
 	FVector HitFromDirection = GetActorRotation().Vector();
 	
-	UGameplayStatics::ApplyPointDamage(OtherActor, 10.0f, HitFromDirection, Hit, GetInstigatorController(), this, DamageTypeClass);
+	UAISense_Hearing::ReportNoiseEvent(this, Hit.ImpactPoint, 1.0f, GetInstigator());
+	UGameplayStatics::ApplyPointDamage(OtherActor, AttackDamage, HitFromDirection, Hit, GetInstigatorController(), this, nullptr);
+
+	if (OtherComp->IsSimulatingPhysics())
+	{
+		OtherComp->AddImpulseAtLocation(HitFromDirection * (AttackDamage * 100), Hit.ImpactPoint);
+	}
 
 	if (EffectOnHit && IsValid(OtherActor))
 	{

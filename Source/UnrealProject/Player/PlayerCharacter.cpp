@@ -5,6 +5,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "SharedGameplayTags.h"
+#include "TestProjectGameTypes.h"
 #include "ActionSystem/ActionSystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
@@ -25,6 +26,11 @@ APlayerCharacter::APlayerCharacter()
 	
 	ActionSystemComponent = CreateDefaultSubobject<UActionSystemComponent>("ActionSystemComponent");
 	ActionSystemComponent->SetDefaultAttributes(UPlayerAttributeSet::StaticClass());
+}
+
+FGenericTeamId APlayerCharacter::GetGenericTeamId() const
+{
+	return FGenericTeamId(TEAM_ID_PLAYER);
 }
 
 

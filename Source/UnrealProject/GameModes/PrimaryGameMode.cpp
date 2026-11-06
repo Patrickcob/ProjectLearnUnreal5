@@ -58,7 +58,7 @@ void APrimaryGameMode::Tick(float DeltaSeconds)
 		float CreditsPerSecond = DirectorData.CreditGainCurve.GetRichCurve()->Eval(TotalElapsedTime) * DeltaSeconds;
 		DirectorData.CurrentCredits += CreditsPerSecond;
 		
-		GEngine->AddOnScreenDebugMessage(KeyID, PrimaryActorTick.TickInterval, FColor::Green, FString::Printf(TEXT("Current Credits: %f\nNext Tick Time: %f"), DirectorData.CurrentCredits, DirectorData.NextTickTime));
+		GEngine->AddOnScreenDebugMessage(KeyID, PrimaryActorTick.TickInterval, DirectorData.DebugColor, FString::Printf(TEXT("%s\nCurrent Credits: %f\nNext Tick Time: %f\n"), *DirectorData.DebugDisplay, DirectorData.CurrentCredits, DirectorData.NextTickTime));
 		KeyID++;
 		
 		if (DirectorData.NextTickTime > TotalElapsedTime)
@@ -167,7 +167,7 @@ void APrimaryGameMode::OnMonsterClassLoaded(const FSoftObjectPath& SoftObjectPat
 		FActorSpawnParameters SpawnParams;
 		AAICharacter* SpawnedMonster = GetWorld()->SpawnActorDeferred<AAICharacter>(MonsterDataAsset->MonsterClass, FTransform::Identity);
 		
-		UE_VLOG_SPHERE(this, LogGameMode, Log, SpawnLocation, 50.0f, FColor::Green, TEXT("Spawned Monster: %s with cost %s"), *MonsterDataAsset->MonsterClass->GetName(), *FString::SanitizeFloat(SelectedMonster->SpawnCost));
+		UE_VLOG_SPHERE(this, LogGameMode, Log, SpawnLocation, 50.0f, FColor::Green, TEXT("Spawned Monster: %s with cost %.2f"), *MonsterDataAsset->MonsterClass->GetName(),SelectedMonster->SpawnCost);
 		
 		UE_LOG(LogTemp, Log, TEXT("Spawned Monster: %s at Location: %s"), *MonsterDataAsset->MonsterClass->GetName(), *SpawnLocation.ToString());
 		

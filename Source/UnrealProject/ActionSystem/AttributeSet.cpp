@@ -58,6 +58,7 @@ UPlayerAttributeSet::UPlayerAttributeSet()
 {
 	Rage = FAttribute(0.0f);
 	MaxRage = FAttribute(100.0f);
+	CoinsNumber = FAttribute(0.0f);
 }
 
 UAIAttributeSet::UAIAttributeSet()

@@ -97,6 +97,9 @@ public:
 	UPROPERTY(EditAnywhere, Category="Resources")
 	FAttribute MaxRage;
 	
+	UPROPERTY(EditAnywhere, Category="Resources")
+	FAttribute CoinsNumber;
+	
 	virtual void PostProcessAttributeChange() override;
 	
 	UPlayerAttributeSet();

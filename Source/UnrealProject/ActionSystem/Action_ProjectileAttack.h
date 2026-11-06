@@ -36,6 +36,5 @@ protected:
 	FName MuzzleSocketName;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Attack")
-	TObjectPtr<UNiagaraSystem> AttackEffect;
-	
+	TObjectPtr<UNiagaraSystem> AttackEffect;	
 };
