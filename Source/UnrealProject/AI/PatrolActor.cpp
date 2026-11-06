@@ -10,63 +10,122 @@
 // Sets default values
 APatrolActor::APatrolActor()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
+#if WITH_EDITORONLY_DATA
+	// Just like if we add a default scene root in Blueprint, we want to show an Icon to keep the Actor selectable
+	DefaultSceneRoot->bVisualizeComponent = true;
+#endif
+	RootComponent = DefaultSceneRoot;
 }
 
-// Called when the game starts or when spawned
-void APatrolActor::BeginPlay()
+void APatrolActor::RemovePatrolConnection(APatrolActor* OtherPatrolPoint)
 {
-	Super::BeginPlay();
-	
-	//Search nearby PatrolActors and add them to the PatrolPoints array within a search radius
-	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetNavigationSystem(this);
-	const ANavigationData* NavData = NavSys ? NavSys->GetDefaultNavDataInstance() : nullptr;
-	if (!NavData)
+	int32 RemoveCount = NearbyPatrolPoints.RemoveSingle(OtherPatrolPoint);
+	if (RemoveCount > 0)
 	{
-		return;
+		MarkPackageDirty();
 	}
-	
-	const FVector Start = GetActorLocation();
-	for (APatrolActor* Other : TActorRange<APatrolActor>(GetWorld()))
+}
+
+void APatrolActor::AddPatrolConnection(APatrolActor* OtherPatrolPoint)
+{
+	// Avoid duplicates and prevent marking assets as dirty when unchanged
+	if (!NearbyPatrolPoints.Contains(OtherPatrolPoint))
 	{
-		if (Other == this)
+		NearbyPatrolPoints.Add(OtherPatrolPoint);
+		MarkPackageDirty();
+	}
+}
+
+void APatrolActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	
+	UWorld* World = GetWorld();
+	float DebugDuration = 2.0f;
+	const FVector StartLocation = GetActorLocation();
+	
+	// by the end IF they are no longer in the nearby patrol list, they should also update to remove "this" from their list.
+	TArray<TWeakObjectPtr<APatrolActor>> PrevPatrolPoints(NearbyPatrolPoints);
+	TArray<APatrolActor*> ValidPatrolPoints;
+
+	for (APatrolActor* OtherPatrolPoint : TActorRange<APatrolActor>(World))
+	{
+		if (OtherPatrolPoint == this)
+		{
+			// skip self
+			continue;
+		}
+		
+		FVector OtherLocation = OtherPatrolPoint->GetActorLocation();
+		// Don't even attempt nav path if we are further away in straight line
+		if (FVector::Distance(StartLocation, OtherLocation) > PatrolSearchRadius)
 		{
 			continue;
 		}
 
-		const FVector End = Other->GetActorLocation();
-
-		// The path can't be shorter than the straight line, so skip the pathfinding when that's already too far
-		if (FVector::DistSquared(Start, End) > FMath::Square(PatrolSearchRadius))
+		double PathLength = 0;
+		ENavigationQueryResult::Type Result = UNavigationSystemV1::GetPathLength(this, StartLocation, OtherLocation, PathLength);
+		if (Result == ENavigationQueryResult::Error)
+		{
+			// Quit trying, nav data isn't available yet
+			UE_LOG(LogTemp, Warning, TEXT("Unable to make patrol points, nav data not ready."));
+			return;
+		}
+		
+		if (Result == ENavigationQueryResult::Success && PathLength <= PatrolSearchRadius)
+		{
+			ValidPatrolPoints.Add(OtherPatrolPoint);
+			NearbyPatrolPoints.Add(OtherPatrolPoint);
+			// Add for the other patrol point too to keep it in sync
+			OtherPatrolPoint->AddPatrolConnection(this);
+			
+			DrawDebugBox(World, OtherLocation, FVector(20.f), FColor::Green, false, DebugDuration);
+			DrawDebugDirectionalArrow(World, StartLocation, OtherLocation, 64.0f, FColor::Green, false, DebugDuration);
+		}
+	}
+	
+	// MoveTemp can be used to move the data, you can't use the data in ValidPatrolPoints itself after this call anymore
+	NearbyPatrolPoints = MoveTemp(ValidPatrolPoints);
+	
+	// remove any no longer valid
+	for (TWeakObjectPtr<APatrolActor> WeakOldPoint : PrevPatrolPoints)
+	{
+		APatrolActor* OldPoint = WeakOldPoint.Get();
+		if (!IsValid(OldPoint) || NearbyPatrolPoints.Contains(OldPoint))
 		{
 			continue;
 		}
-
-		FPathFindingQuery Query(this, *NavData, Start, End);
-		const FPathFindingResult Result = NavSys->FindPathSync(Query);
-
-		if (Result.IsSuccessful() && Result.Path.IsValid() && !Result.Path->IsPartial()
-			&& Result.Path->GetLength() <= PatrolSearchRadius)
+		
+		if (!NearbyPatrolPoints.Contains(OldPoint))
 		{
-			PatrolPoints.AddUnique(Other);
+			// No longer a connection, push update on the other patrol point to keep it in sync
+			OldPoint->RemovePatrolConnection(this);
+			
+			FVector OtherLocation = OldPoint->GetActorLocation();
+			DrawDebugDirectionalArrow(World, StartLocation, OtherLocation, 64.0f, FColor::Orange, false, DebugDuration);
+			DrawDebugBox(World, OtherLocation, FVector(20.f), FColor::Orange, false, DebugDuration);
 		}
 	}
+	
 }
 
-
-// Called every frame
-void APatrolActor::Tick(float DeltaTime)
+void APatrolActor::Tick(float DeltaSeconds)
 {
-	Super::Tick(DeltaTime);
-	//Render a debug sphere at the actor's location and a line to each patrol point
-	DrawDebugSphere(GetWorld(), GetActorLocation(), 50.0f, 12, FColor::Green, false, -1.0f, 0, 2.0f);
-	for (APatrolActor* PatrolPoint : PatrolPoints)
+	Super::Tick(DeltaSeconds);
+	
+	// Draw the patrol search radius
+	DrawDebugSphere(GetWorld(), GetActorLocation(), PatrolSearchRadius, 32.0f, FColor::Green, false, -1.0f, 0, 2.0f);
+	DrawDebugBox(GetWorld(), GetActorLocation(), FVector(20.f), FColor::Orange, false, -1.0f, 0, 2.0f);
+
+	//debug draw the patrol connections
+	for (TObjectPtr<APatrolActor> OtherPatrolPoint : NearbyPatrolPoints)
 	{
-		if (PatrolPoint)
+		if (IsValid(OtherPatrolPoint))
 		{
-			DrawDebugLine(GetWorld(), GetActorLocation(), PatrolPoint->GetActorLocation(), FColor::Blue, false, -1.0f, 0, 2.0f);
+			DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), OtherPatrolPoint->GetActorLocation(), 64.0f, FColor::Blue, false, -1.0f, 0, 2.0f);
 		}
 	}
 }
-

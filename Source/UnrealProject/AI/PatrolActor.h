@@ -14,18 +14,29 @@ class UNREALPROJECT_API APatrolActor : public AActor
 public:
 	// Sets default values for this actor's properties
 	APatrolActor();
-
+	
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	
+	UPROPERTY()
+	TObjectPtr<USceneComponent> DefaultSceneRoot;
 	
 	UPROPERTY(EditAnywhere, Category="Patrol")
-	TArray<TObjectPtr<APatrolActor>> PatrolPoints;
+	TArray<TObjectPtr<APatrolActor>> NearbyPatrolPoints;
 	
 	UPROPERTY(EditAnywhere, Category="Patrol")
 	float PatrolSearchRadius = 1000.0f;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	TArray<APatrolActor*> GetConnections() const
+	{
+		return NearbyPatrolPoints;
+	}
+	
+	void RemovePatrolConnection(APatrolActor* OtherPatrolPoint);
+	
+	void AddPatrolConnection(APatrolActor* OtherPatrolPoint);
+	
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+	virtual void Tick(float DeltaSeconds) override;
 };
